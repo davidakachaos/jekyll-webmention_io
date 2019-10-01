@@ -12,8 +12,13 @@ require "uglifier"
 module Jekyll
   module WebmentionIO
     class JavaScriptFile < StaticFile
+      # Seems not to be used?
       def destination_rel_dir
         WebmentionIO.js_handler.destination
+      end
+      # Seems to work?
+      def cleaned_relative_path
+        return "/#{WebmentionIO.js_handler.destination}/#{basename}"
       end
     end
 
