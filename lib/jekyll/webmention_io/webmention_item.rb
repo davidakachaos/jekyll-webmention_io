@@ -120,7 +120,36 @@ module Jekyll
       end
 
       def determine_author
-        @raw.dig("data", "author")
+        author = @raw.dig("data", "author")
+        if @type == "link"
+          # https://gewoonautastisch.nl/de-positieve-kenmerken-van-autisme/
+          html_source = WebmentionIO.get_uri_source(@uri)
+          unless html_source
+            return author
+          end
+
+          unless html_source.valid_encoding?
+            html_source = html_source.encode("UTF-16be", :invalid => :replace, :replace => "?").encode("UTF-8")
+          end
+
+          # Check the `title` first
+          matches = /<title>(.*)<\/title>/.match(html_source)
+          if matches
+            author = matches[1].strip
+          else
+            # Fall back to the first `h1`
+            matches = /<h1>(.*)<\/h1>/.match(html_source)
+            author = if matches
+                      matches[1].strip
+                    else
+                      author = "No author available"
+                    end
+          end
+
+          # cleanup
+          author = author.gsub(/<\/?[^>]+?>/, "")
+        end
+        return author
       end
 
       def determine_title

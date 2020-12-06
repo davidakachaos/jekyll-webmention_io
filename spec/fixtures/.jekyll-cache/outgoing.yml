@@ -1,0 +1,8 @@
+---
+"/2001/01/01/post.html":
+  http://inreplyto.com: false
+  http://contentlink1.com: false
+  https://contentlink2.org: false
+"/2001/01/02/other-post.html":
+  http://contentlink1.com: false
+  https://contentlink2.org: false
