@@ -2,7 +2,7 @@ inherit_gem:
   jekyll: .rubocop.yml
 
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.7
   Exclude:
     - Gemfile
     - Rakefile
@@ -18,7 +18,7 @@ Metrics/BlockLength:
 Metrics/MethodLength:
   Max: 40
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 150
 
 Style/RegexpLiteral:
