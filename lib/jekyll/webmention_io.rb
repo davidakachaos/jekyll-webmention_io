@@ -329,7 +329,8 @@ module Jekyll
     # Private Methods
 
     def self.get_http_response(uri)
-      uri  = URI.parse(URI.encode(uri))
+      # uri  = URI.parse(URI.encode(uri))
+      uri  = URI.parse(uri)
       http = Net::HTTP.new(uri.host, uri.port)
       http.read_timeout = 10
 
@@ -352,7 +353,8 @@ module Jekyll
 
     # Cache bad URLs for a bit
     def self.uri_is_not_ok(uri)
-      uri = URI.parse(URI.encode(uri.to_s))
+      # uri = URI.parse(URI.encode(uri.to_s))
+      uri  = URI.parse(uri)
       # Never cache webmention.io in here
       return if uri.host == "webmention.io"
 
@@ -363,7 +365,8 @@ module Jekyll
     end
 
     def self.uri_ok?(uri)
-      uri = URI.parse(URI.encode(uri.to_s))
+      # uri = URI.parse(URI.encode(uri.to_s))
+      uri  = URI.parse(uri)
       now = Time.now.to_s
       bad_uris = load_yaml(@cache_files["bad_uris"])
       if bad_uris.key? uri.host

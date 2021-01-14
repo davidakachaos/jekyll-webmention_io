@@ -50,7 +50,7 @@ def file_content_from_hash(input_hash)
       "{{ #{input_hash["input"]} | #{input_hash["filter"]} }}"
     end
 
-  Jekyll::Utils.strip_heredoc(<<-EOF)
+  return <<-EOF
     ---
     #{matter.gsub(%r!\n!, "\n    ")}
     ---

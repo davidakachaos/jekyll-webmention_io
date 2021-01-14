@@ -44,9 +44,9 @@ EOF
   s.add_runtime_dependency "string_inflection", "~> 0.1"
   s.add_runtime_dependency "htmlbeautifier", "~> 1.1"
   s.add_runtime_dependency "uglifier", "~> 4.1"
-  s.add_runtime_dependency "webmention", "~> 0.1.6"
+  s.add_runtime_dependency "webmention", "~> 4.0.0"
 
-  s.add_development_dependency "bundler", "~> 1.14"
+  s.add_development_dependency "bundler", "~> 2.2.5"
   s.add_development_dependency "cucumber", "~> 3.1"
   s.add_development_dependency "rake", "~> 12.0"
   s.add_development_dependency "rspec", "~> 3.5"
