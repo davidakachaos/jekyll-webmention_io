@@ -55,9 +55,7 @@ module Jekyll
 
         if string
           string = @converter.convert(string.to_s)
-          unless string.start_with?("<p")
-            string = string.sub(/^<[^>]+>/, "<p>").sub(/<\/[^>]+>$/, "</p>")
-          end
+          string = string.sub(/^<[^>]+>/, "<p>").sub(/<\/[^>]+>$/, "</p>") unless string.start_with?("<p")
           string.strip
         else
           string
@@ -80,9 +78,7 @@ module Jekyll
 
       def determine_id
         id = @raw["id"].to_s
-        if @source == "twitter" && !@uri.include?("#favorited-by")
-          id = URI(@uri).path.split("/").last.to_s
-        end
+        id = URI(@uri).path.split("/").last.to_s if @source == "twitter" && !@uri.include?("#favorited-by")
         unless id
           time = Time.now
           id = time.strftime("%s").to_s
@@ -129,13 +125,9 @@ module Jekyll
         if @type == "post"
 
           html_source = WebmentionIO.get_uri_source(@uri)
-          unless html_source
-            return title
-          end
+          return title unless html_source
 
-          unless html_source.valid_encoding?
-            html_source = html_source.encode("UTF-16be", :invalid => :replace, :replace => "?").encode("UTF-8")
-          end
+          html_source = html_source.encode("UTF-16be", :invalid => :replace, :replace => "?").encode("UTF-8") unless html_source.valid_encoding?
 
           # Check the `title` first
           matches = /<title>(.*)<\/title>/.match(html_source)
@@ -158,7 +150,7 @@ module Jekyll
           name = @raw.dig("data", "name")
           title = name if name
 
-        end # if post
+        end
 
         title
       end

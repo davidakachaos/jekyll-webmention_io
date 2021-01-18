@@ -61,7 +61,7 @@ module Jekyll
         "incoming" => cache_file("received.yml"),
         "outgoing" => cache_file("outgoing.yml"),
         "bad_uris" => cache_file("bad_uris.yml"),
-        "lookups"  => cache_file("lookups.yml")
+        "lookups"  => cache_file("lookups.yml"),
       }
       @cache_files.each_value do |file|
         dump_yaml(file) unless File.exist?(file)
@@ -103,25 +103,25 @@ module Jekyll
     def self.gather_documents(site)
       documents = site.posts.docs.clone
 
-      if @config.dig("pages") == true
+      if @config["pages"] == true
         log "info", "Including site pages."
         documents.concat site.pages.clone
       end
 
-      collections = @config.dig("collections")
+      collections = @config["collections"]
       if collections
         log "info", "Adding collections."
         site.collections.each do |name, collection|
           # skip _posts
           next if name == "posts"
 
-          unless collections.is_a?(Array) && !collections.include?(name)
-            documents.concat collection.docs.clone
-          end
+          documents.concat collection.docs.clone unless collections.is_a?(Array) && !collections.include?(name)
         end
       end
 
-      return documents
+      log "info", "Checking documents -> #{documents.inspect}"
+
+      documents
     end
 
     def self.get_response(api_params)
@@ -160,7 +160,7 @@ module Jekyll
           return true
         end
       end
-      return false
+      false
     end
 
     TIMEFRAMES = {
@@ -179,7 +179,7 @@ module Jekyll
         end
       end
       timeframe ||= "older"
-      return timeframe
+      timeframe
     end
 
     # supported: daily, weekly, monthly, yearly, every X days|weeks|months|years
@@ -203,7 +203,7 @@ module Jekyll
         unit = "day"
       end
       # dynamic method call
-      return today.send "prev_#{unit}", n
+      today.send "prev_#{unit}", n
     end
 
     def self.get_webmention_endpoint(uri)
@@ -258,10 +258,10 @@ module Jekyll
     end
 
     def self.html_templates
-      proofer = if @config['html_proofer'] == true
-                  ' data-proofer-ignore'
+      proofer = if @config["html_proofer"] == true
+                  " data-proofer-ignore"
                 else
-                  ''
+                  ""
                 end
       @html_templates ||= begin
         templates = +"" # unfrozen String
@@ -282,25 +282,25 @@ module Jekyll
       if redirect_limit.positive?
         response = get_http_response(uri)
         case response
-        when Net::HTTPSuccess then
-          return response.body.force_encoding("UTF-8")
-        when Net::HTTPRedirection then
+        when Net::HTTPSuccess
+          response.body.force_encoding("UTF-8")
+        when Net::HTTPRedirection
           redirect_to = URI.parse(URI.encode(response["location"]))
           redirect_to = redirect_to.relative? ? "#{original_uri.scheme}://#{original_uri.host}" + redirect_to.to_s : redirect_to.to_s
-          return get_uri_source(redirect_to, redirect_limit - 1, original_uri)
+          get_uri_source(redirect_to, redirect_limit - 1, original_uri)
         else
           uri_is_not_ok(uri)
-          return false
+          false
         end
       else
         log("warn", "too many redirects for #{original_uri}") if original_uri
         uri_is_not_ok(uri)
-        return false
+        false
       end
     end
 
     def self.log(type, message)
-      debug = !!@config.dig("debug")
+      debug = !!@config["debug"]
       if debug || %w(error msg).include?(type)
         type = "info" if type == "msg"
         Jekyll.logger.method(type).call("#{@logger_prefix} #{message}")
@@ -329,8 +329,7 @@ module Jekyll
     # Private Methods
 
     def self.get_http_response(uri)
-      # uri  = URI.parse(URI.encode(uri))
-      uri  = URI.parse(uri)
+      uri  = URI.parse(URI.encode(uri))
       http = Net::HTTP.new(uri.host, uri.port)
       http.read_timeout = 10
 
@@ -341,20 +340,18 @@ module Jekyll
       end
 
       begin
-        request  = Net::HTTP::Get.new(uri.request_uri)
-        response = http.request(request)
-        return response
+        request = Net::HTTP::Get.new(uri.request_uri)
+        http.request(request)
       rescue *EXCEPTIONS => e
         log "warn", "Got an error checking #{uri}: #{e}"
         uri_is_not_ok(uri)
-        return false
+        false
       end
     end
 
     # Cache bad URLs for a bit
     def self.uri_is_not_ok(uri)
-      # uri = URI.parse(URI.encode(uri.to_s))
-      uri  = URI.parse(uri)
+      uri = URI.parse(URI.encode(uri.to_s))
       # Never cache webmention.io in here
       return if uri.host == "webmention.io"
 
@@ -366,7 +363,7 @@ module Jekyll
 
     def self.uri_ok?(uri)
       # uri = URI.parse(URI.encode(uri.to_s))
-      uri  = URI.parse(uri)
+      uri = URI.parse(uri)
       now = Time.now.to_s
       bad_uris = load_yaml(@cache_files["bad_uris"])
       if bad_uris.key? uri.host
@@ -375,7 +372,7 @@ module Jekyll
         recheck_at = last_checked.next_day(cache_bad_uris_for).to_s
         return false if recheck_at > now
       end
-      return true
+      true
     end
 
     private_class_method :get_http_response, :uri_is_not_ok

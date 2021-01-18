@@ -1,4 +1,3 @@
-# coding: utf-8
 # frozen_string_literal: true
 
 #  (c) Aaron Gustafson
@@ -18,9 +17,9 @@ module Jekyll
         @site = site
         @site_url = site.config["url"].to_s
 
-        if @site.config['serving']
+        if @site.config["serving"]
           Jekyll::WebmentionIO.log "msg", "Webmentions lookups are not run when running `jekyll serve`."
-          @site.config['webmentions']['pause_lookups'] = true
+          @site.config["webmentions"]["pause_lookups"] = true
           return
         end
 
@@ -53,9 +52,7 @@ module Jekyll
           mentions = get_mentioned_uris(post)
           if webmentions.key? uri
             mentions.each do |mentioned_uri, response|
-              unless webmentions[uri].key? mentioned_uri
-                webmentions[uri][mentioned_uri] = response
-              end
+              webmentions[uri][mentioned_uri] = response unless webmentions[uri].key? mentioned_uri
             end
           else
             webmentions[uri] = mentions
@@ -67,23 +64,18 @@ module Jekyll
 
       def get_mentioned_uris(post)
         uris = {}
-        if post.data["in_reply_to"]
-          uris[post.data["in_reply_to"]] = false
-        end
+        uris[post.data["in_reply_to"]] = false if post.data["in_reply_to"]
         post.content.scan(/(?:https?:)?\/\/[^\s)#\[\]{}<>%|\^"]+/) do |match|
-          unless uris.key? match
-            uris[match] = false
-          end
+          uris[match] = false unless uris.key? match
         end
-        return uris
+        uris
       end
 
       def upgrade_outgoing_webmention_cache
         old_sent_file = WebmentionIO.cache_file("sent.yml")
         old_outgoing_file = WebmentionIO.cache_file("queued.yml")
-        unless File.exist? old_sent_file
-          return
-        end
+        return unless File.exist? old_sent_file
+
         sent_webmentions = WebmentionIO.load_yaml(old_sent_file)
         outgoing_webmentions = WebmentionIO.load_yaml(old_outgoing_file)
         merged = {}

@@ -19,9 +19,9 @@ module Jekyll
         @site = site
         @site_url = site.config["url"].to_s
 
-        if @site.config['serving']
+        if @site.config["serving"]
           Jekyll::WebmentionIO.log "msg", "Webmentions won’t be gathered when running `jekyll serve`."
-          @site.config['webmentions']['pause_lookups'] = true
+          @site.config["webmentions"]["pause_lookups"] = true
           return
         end
 
@@ -53,14 +53,14 @@ module Jekyll
         WebmentionIO.cache_lookup_dates @lookups
 
         WebmentionIO.cache_webmentions "incoming", @cached_webmentions
-      end # generate
+      end
 
       private
 
       def check_for_webmentions(post)
         WebmentionIO.log "info", "Checking for webmentions of #{post.url}."
 
-        last_webmention = @cached_webmentions.dig(post.url, @cached_webmentions.dig(post.url)&.keys&.last)
+        last_webmention = @cached_webmentions.dig(post.url, @cached_webmentions[post.url]&.keys&.last)
 
         # get the last webmention
         last_lookup = if @lookups[post.url]
@@ -68,13 +68,11 @@ module Jekyll
                       elsif last_webmention
                         Date.parse last_webmention.dig("raw", "verified_date")
                       end
-
+        WebmentionIO.log "info", "Last update: #{last_lookup.inspect}"
         # should we throttle?
-        if post.respond_to? "date" # Some docs have no date
-          if last_lookup && WebmentionIO.post_should_be_throttled?(post, post.date, last_lookup)
-            WebmentionIO.log "info", "Throttling this post."
-            return
-          end
+        if post.respond_to?("date") && last_lookup && WebmentionIO.post_should_be_throttled?(post, post.date, last_lookup)
+          WebmentionIO.log "info", "Throttling this post."
+          return
         end
 
         # Get the last id we have in the hash
@@ -85,7 +83,7 @@ module Jekyll
 
         # execute the API
         response = WebmentionIO.get_response assemble_api_params(targets, since_id)
-        webmentions = response.dig("links")
+        webmentions = response["links"]
         if webmentions && !webmentions.empty?
           WebmentionIO.log "info", "Here’s what we got back:\n\n#{response.inspect}\n\n"
         else
@@ -156,17 +154,15 @@ module Jekyll
             webmention = WebmentionIO::WebmentionItem.new(link, @site)
 
             # Do we already have it?
-            if webmentions.key? webmention.id
-              next
-            end
+            next if webmentions.key? webmention.id
 
             # Add it to the list
             WebmentionIO.log "info", webmention.to_hash.inspect
             webmentions[webmention.id] = webmention.to_hash
-          end # each link
-        end # if response
+          end
+        end
         @cached_webmentions[post_uri] = webmentions
-      end # process_webmentions
+      end
     end
   end
 end

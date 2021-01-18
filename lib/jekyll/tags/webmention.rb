@@ -32,9 +32,7 @@ module Jekyll
       end
 
       def template=(template)
-        unless WebmentionIO.supported_templates.include? template
-          WebmentionIO.log "error", "#{template.capitalize} is not supported"
-        end
+        WebmentionIO.log "error", "#{template.capitalize} is not supported" unless WebmentionIO.supported_templates.include? template
         @template_name = template
         @template = WebmentionIO.get_template_contents(template)
         WebmentionIO.log "info", "#{template.capitalize} template:\n\n#{@template}\n\n"
@@ -47,17 +45,15 @@ module Jekyll
       def extract_type(type, webmentions)
         WebmentionIO.log "info", "Looking for #{type}"
         keep = {}
-        if !WebmentionIO.types.include? type
-          WebmentionIO.log "warn", "#{type} are not extractable"
-        else
+        if WebmentionIO.types.include? type
           type = type.to_singular
           WebmentionIO.log "info", "Searching #{webmentions.length} webmentions for type==#{type}"
-          if webmentions.is_a? Hash
-            webmentions = webmentions.values
-          end
+          webmentions = webmentions.values if webmentions.is_a? Hash
           webmentions.each do |webmention|
             keep[webmention["id"]] = webmention if webmention["type"] == type
           end
+        else
+          WebmentionIO.log "warn", "#{type} are not extractable"
         end
         keep
       end
@@ -89,9 +85,7 @@ module Jekyll
             webmentions = all_webmentions
           end
 
-          if webmentions.is_a? Hash
-            webmentions = webmentions.values
-          end
+          webmentions = webmentions.values if webmentions.is_a? Hash
 
           webmentions = sort_webmentions(webmentions)
           set_data(webmentions, types)
@@ -113,18 +107,14 @@ module Jekyll
           # Clean up the output
           HtmlBeautifier.beautify html.each_line.reject { |x| x.strip == "" }.join
         else
-          unless @template
-            WebmentionIO.log "warn", "#{self.class} No template provided"
-          end
-          unless @data
-            WebmentionIO.log "warn", "#{self.class} No data provided"
-          end
+          WebmentionIO.log "warn", "#{self.class} No template provided" unless @template
+          WebmentionIO.log "warn", "#{self.class} No data provided" unless @data
           ""
         end
       end
 
       def sort_webmentions(webmentions)
-        return webmentions.sort_by { |webmention| webmention["pubdate"].to_i }
+        webmentions.sort_by { |webmention| webmention["pubdate"].to_i }
       end
     end
   end

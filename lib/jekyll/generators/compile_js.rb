@@ -12,6 +12,12 @@ require "uglifier"
 module Jekyll
   module WebmentionIO
     class JavaScriptFile < StaticFile
+      # I don't know why it works, but it does in the latest version of Jekyll!
+      def initialize(site, base, dir, name, _collection = nil)
+        super(site, base, dir, name, _collection = nil)
+        @relative_path = WebmentionIO.js_handler.destination + @relative_path
+      end
+
       def destination_rel_dir
         WebmentionIO.js_handler.destination
       end
@@ -32,11 +38,9 @@ module Jekyll
           return
         end
 
-        if @site.config['serving']
-          Jekyll::WebmentionIO.log "msg", "A WebmentionIO.js source file will not be generated during `jekyll serve`."
-        end
+        Jekyll::WebmentionIO.log "msg", "A WebmentionIO.js source file will not be generated during `jekyll serve`." if @site.config["serving"]
 
-        @source_file_destination = if handler.source? && !@site.config['serving'] 
+        @source_file_destination = if handler.source? && !@site.config["serving"]
                                      @site.in_source_dir(handler.destination)
                                    else
                                      Dir.mktmpdir
@@ -81,12 +85,14 @@ module Jekyll
       end
 
       def create_js_file
+        Jekyll::WebmentionIO.log "msg", "Creating JS file @ #{File.join(@source_file_destination, @file_name)}"
         Dir.mkdir(@source_file_destination) unless File.exist?(@source_file_destination)
         File.open(File.join(@source_file_destination, @file_name), "wb") { |f| f.write(@javascript) }
       end
 
       def deploy_js_file
         js_file = WebmentionIO::JavaScriptFile.new(@site, @source_file_destination, "", @file_name)
+        Jekyll::WebmentionIO.log "msg", "Adding JS file @ #{js_file.inspect} to Jekyll Static files..."
         @site.static_files << js_file
       end
     end

@@ -35,9 +35,7 @@ module Jekyll
                 next unless response == false
 
                 # convert protocol-less links
-                if target.index("//").zero?
-                  target = "http:#{target}"
-                end
+                target = "http:#{target}" if target.index("//").zero?
 
                 # skip bad URLs
                 next unless WebmentionIO.uri_ok?(target)
@@ -60,13 +58,11 @@ module Jekyll
                 count += 1
               end
             end
-            if count.positive?
-              WebmentionIO.dump_yaml(cached_outgoing, outgoing)
-            end
+            WebmentionIO.dump_yaml(cached_outgoing, outgoing) if count.positive?
             WebmentionIO.log "msg", "#{count} webmentions sent."
-          end # file exists (outgoing)
-        end # def process
-      end # WebmentionCommand
-    end # Commands
-  end # WebmentionIO
-end # Jekyll
+          end
+        end
+      end
+    end
+  end
+end
