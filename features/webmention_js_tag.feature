@@ -6,8 +6,8 @@ Feature: Webmentions JS Tag
     When I run jekyll build
     Then I should get a zero exit status
     And the _site directory should exist
-    And the "_site/js/JekyllWebmentionIO.js" file should exist
     And I should see "/js/JekyllWebmentionIO.js\" async=\"\"></script>" in "_site/index.html"
+    And the "_site/js/JekyllWebmentionIO.js" file should exist
 
   Scenario: Rendering the Webmention JavaScript Tag with custom configuration
     Given I have an "index.md" page that contains "{% webmentions_js %}"

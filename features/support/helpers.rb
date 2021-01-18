@@ -50,7 +50,7 @@ def file_content_from_hash(input_hash)
       "{{ #{input_hash["input"]} | #{input_hash["filter"]} }}"
     end
 
-  return <<-EOF
+  <<-EOF
     ---
     #{matter.gsub(%r!\n!, "\n    ")}
     ---
@@ -68,6 +68,7 @@ def all_steps_to_path(path)
 
   dest.ascend do |f|
     break if f == source_dir
+
     paths.unshift f.to_s
   end
 

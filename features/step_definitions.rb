@@ -8,12 +8,12 @@ end
 
 #
 
-After do
-  FileUtils.rm_rf(Paths.test_dir) if Paths.test_dir.exist?
-  Paths.output_file.delete if Paths.output_file.exist?
-  Paths.status_file.delete if Paths.status_file.exist?
-  Dir.chdir(Paths.test_dir.parent)
-end
+# After do
+#   FileUtils.rm_rf(Paths.test_dir) if Paths.test_dir.exist?
+#   Paths.output_file.delete if Paths.output_file.exist?
+#   Paths.status_file.delete if Paths.status_file.exist?
+#   Dir.chdir(Paths.test_dir.parent)
+# end
 
 #
 
@@ -195,6 +195,7 @@ end
 
 Then(%r!^the "(.*)" file should +(not )?exist$!) do |file, negative|
   if negative.nil?
+    puts "Checking for #{Dir.pwd}/#{file}"
     expect(Pathname.new(file)).to exist
   else
     expect(Pathname.new(file)).to_not exist
