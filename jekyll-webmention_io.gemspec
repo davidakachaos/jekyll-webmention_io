@@ -51,5 +51,6 @@ EOF
   s.add_development_dependency "rake", "~> 12.0"
   s.add_development_dependency "rspec", "~> 3.5"
   s.add_development_dependency "html-proofer", "~> 3.6"
-  s.add_development_dependency "rubocop", "~> 0.48"
+  s.add_development_dependency "rubocop", "~> 1.8.0"
+  s.add_development_dependency "rubocop-performance"
 end
